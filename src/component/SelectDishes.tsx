@@ -10,31 +10,36 @@ interface SelectDishesProps {
 
 const SelectDishes: React.FC<SelectDishesProps> = ({ restaurant, dishes, updateSelection }) => {
     const [selectedDishes, setSelectedDishes] = useState<{ name: string; servings: number }[]>([]);
-    const [newDish, setNewDish] = useState<{ name: string; servings: number }>({ name: '', servings: 1 });
     const [filteredDishes, setFilteredDishes] = useState<IDish[]>([]);
 
     useEffect(() => {
         setFilteredDishes(dishes.filter(dish => dish.restaurant === restaurant));
     }, [dishes, restaurant]);
 
-    const handleDishChange = (index: number, field: 'name' | 'servings', value: string | number) => {
-        const updatedDishes = [...selectedDishes];
-        if (field === 'name') {
-            updatedDishes[index].name = value as string;
-        } else {
-            updatedDishes[index].servings = value as number;
-        }
-        setSelectedDishes(updatedDishes);
-        updateSelection('dishes', updatedDishes);
+    useEffect(() => {
+        updateSelection('dishes', selectedDishes);
+    }, [selectedDishes, updateSelection]);
+
+    const handleDishChange = (index: number, field: 'name' | 'servings', value: string | number | null) => {
+        if (value == null) return;
+        setSelectedDishes(currentDishes =>
+            currentDishes.map((dish, i) =>
+                i === index ? { ...dish, [field]: value } : dish
+            ),
+        );
     };
 
     const handleAddDish = () => {
-        if (newDish.name) {
-            const newSelectedDishes = [...selectedDishes, newDish];
-            setSelectedDishes(newSelectedDishes);
-            updateSelection('dishes', newSelectedDishes);
-            setNewDish({ name: '', servings: 1 }); 
-        }
+        setSelectedDishes(currentDishes => [
+            ...currentDishes,
+            { name: '', servings: 1 }
+        ]);
+    };
+
+    const handleRemoveDish = (index: number) => {
+        setSelectedDishes(currentDishes =>
+            currentDishes.filter((_, i) => i !== index)
+        );
     };
 
     return (
@@ -44,46 +49,27 @@ const SelectDishes: React.FC<SelectDishesProps> = ({ restaurant, dishes, updateS
                     <Select
                         value={selectedDish.name}
                         style={{ width: 120, marginRight: '10px' }}
-                        onChange={(value) => handleDishChange(index, 'name', value)}
+                        onChange={value => handleDishChange(index, 'name', value)}
                     >
-                        {filteredDishes.map((dish) => (
+                        {filteredDishes.map(dish => (
                             <Select.Option key={dish.id} value={dish.name}>{dish.name}</Select.Option>
                         ))}
                     </Select>
                     <InputNumber
                         min={1}
                         value={selectedDish.servings}
-                        onChange={(value: any) => handleDishChange(index, 'servings', value)}
+                        onChange={value => handleDishChange(index, 'servings', value ?? 1)}
                         placeholder="Servings"
                         style={{ marginRight: '10px' }}
                     />
-                    <Button type="dashed" onClick={() => setSelectedDishes(selectedDishes.filter((_, i) => i !== index))}>
+                    <Button type="dashed" onClick={() => handleRemoveDish(index)}>
                         Remove
                     </Button>
                 </div>
             ))}
-            <div style={{ marginBottom: '10px' }}>
-                <Select
-                    value={newDish.name}
-                    style={{ width: 120, marginRight: '10px' }}
-                    onChange={(value) => setNewDish({ ...newDish, name: value })}
-                    placeholder="Select a dish"
-                >
-                    {filteredDishes.map((dish) => (
-                        <Select.Option key={dish.id} value={dish.name}>{dish.name}</Select.Option>
-                    ))}
-                </Select>
-                <InputNumber
-                    min={1}
-                    value={newDish.servings}
-                    onChange={(value: any) => setNewDish({ ...newDish, servings: value })}
-                    placeholder="Servings"
-                    style={{ marginRight: '10px' }}
-                />
-                <Button type="primary" onClick={handleAddDish} disabled={!newDish.name}>
-                    Add
-                </Button>
-            </div>
+            <Button type="dashed" onClick={handleAddDish} style={{ marginTop: '10px' }}>
+                Add  Dish
+            </Button>
         </>
     );
 };
