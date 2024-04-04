@@ -9,7 +9,8 @@ interface SelectDishesProps {
 }
 
 const SelectDishes: React.FC<SelectDishesProps> = ({ restaurant, dishes, updateSelection }) => {
-    const [selectedDishes, setSelectedDishes] = useState<{ name: string; servings: number }[]>([]);
+    // Initialize selectedDishes with a default entry
+    const [selectedDishes, setSelectedDishes] = useState<{ name: string; servings: number }[]>([{ name: '', servings: 1 }]);
     const [filteredDishes, setFilteredDishes] = useState<IDish[]>([]);
 
     useEffect(() => {
@@ -37,9 +38,11 @@ const SelectDishes: React.FC<SelectDishesProps> = ({ restaurant, dishes, updateS
     };
 
     const handleRemoveDish = (index: number) => {
-        setSelectedDishes(currentDishes =>
-            currentDishes.filter((_, i) => i !== index)
-        );
+        if (selectedDishes.length > 1) {
+            setSelectedDishes(currentDishes =>
+                currentDishes.filter((_, i) => i !== index)
+            );
+        }
     };
 
     return (
@@ -50,6 +53,7 @@ const SelectDishes: React.FC<SelectDishesProps> = ({ restaurant, dishes, updateS
                         value={selectedDish.name}
                         style={{ width: 120, marginRight: '10px' }}
                         onChange={value => handleDishChange(index, 'name', value)}
+                        placeholder="Select a dish"
                     >
                         {filteredDishes.map(dish => (
                             <Select.Option key={dish.id} value={dish.name}>{dish.name}</Select.Option>
@@ -68,7 +72,7 @@ const SelectDishes: React.FC<SelectDishesProps> = ({ restaurant, dishes, updateS
                 </div>
             ))}
             <Button type="dashed" onClick={handleAddDish} style={{ marginTop: '10px' }}>
-                Add  Dish
+                Add Dish
             </Button>
         </>
     );
