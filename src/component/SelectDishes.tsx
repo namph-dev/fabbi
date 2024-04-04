@@ -9,7 +9,6 @@ interface SelectDishesProps {
 }
 
 const SelectDishes: React.FC<SelectDishesProps> = ({ restaurant, dishes, updateSelection }) => {
-    // Initialize selectedDishes with a default entry
     const [selectedDishes, setSelectedDishes] = useState<{ name: string; servings: number }[]>([{ name: '', servings: 1 }]);
     const [filteredDishes, setFilteredDishes] = useState<IDish[]>([]);
 
